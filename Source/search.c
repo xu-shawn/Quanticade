@@ -530,8 +530,9 @@ static inline int negamax(position_t *pos, thread_t *thread, int alpha,
       }
     }
 
-    // Internal Iterative Deepening
+    // Internal Iterative Deepening & Reduction
     if (pv_node && depth >= IID_DEPTH && !tt_move) {
+      depth -= 2;
       negamax(pos, thread, alpha, beta,
               MAX(1, MIN(depth / 2, depth - IID_REDUCTION)), 0);
       score = read_hash_entry(pos, alpha, &tt_move, beta, depth);
