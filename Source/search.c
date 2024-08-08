@@ -771,6 +771,15 @@ static inline int negamax(position_t *pos, thread_t *thread, int alpha,
       skip_quiets = 1;
     }
 
+    r = reductions[MIN(31, depth)][MIN(31, moves_searched)];
+    const int lmr_depth = MAX(0, depth - 1 - r);
+
+    // Futility Pruning
+    if (!root_node && lmr_depth <= 7 && !in_check && quiet &&
+        static_eval + lmr_depth * 150 + 150 <= alpha) {
+      continue;
+    }
+
     const int see_threshold = quiet ? -SEE_QUIET * depth : -SEE_CAPTURE * depth * depth;
     if (depth <= SEE_DEPTH && legal_moves > 0 && !SEE(pos, list_move, see_threshold))
       continue;
@@ -822,8 +831,6 @@ static inline int negamax(position_t *pos, thread_t *thread, int alpha,
 
     // condition to consider LMR
     if (do_lmr) {
-
-      r = reductions[MIN(31, depth)][MIN(31, moves_searched)];
       r += !pv_node;
 
       int reddepth = MAX(1, depth - 1 - MAX(r, 1));
